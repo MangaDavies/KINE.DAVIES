@@ -1,11 +1,643 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba GIT</title>
+    <title>KINE.DAVIES - Agenda Kinesiólogo</title>
+    <!-- Favicon usando el logo -->
+    <link rel="icon" href="./1000198061.jpg" type="image/jpeg">
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de íconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Definición de la fuente Inter y scroll suave */
+        html {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* Estilos personalizados para el fondo oscuro y tecnológico */
+        .hero-section {
+            background-color: #0d1117;
+            background-image: radial-gradient(circle at 50% 120%, rgba(30, 100, 150, 0.2), transparent 70%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Efecto de 'circuito' que imita la estética del logo */
+        .circuit-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, #1f293755, #1f293755 1px, transparent 1px, transparent 100px),
+                repeating-linear-gradient(90deg, #1f293755, #1f293755 1px, transparent 1px, transparent 100px);
+            background-size: 10px 10px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.7); /* Azul neón inicial */
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Estilo para los días del calendario */
+        .day-cell {
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .day-cell:not(.disabled):hover {
+            background-color: #1e40af; /* Azul oscuro en hover */
+        }
+        .day-cell.selected {
+            background-color: #3b82f6; /* Azul brillante seleccionado */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            transform: scale(1.05);
+        }
+        .day-cell.disabled {
+            color: #4b5563; /* Gris más oscuro para días deshabilitados */
+            cursor: not-allowed;
+        }
+
+        /* Estilo específico para el botón flotante de WhatsApp */
+        .whatsapp-float-button {
+            z-index: 1000;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .whatsapp-float-button:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.5);
+        }
+        
+        /* Estilo para la imagen del perfil */
+        .profile-img {
+            border: 4px solid #3b82f6; /* Borde azul */
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); /* Sombra de brillo azul */
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100">
+
+    <!-- Navegación Fija y Responsiva -->
+    <header class="sticky top-0 z-50 bg-gray-900/90 backdrop-blur-sm shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo/Título de la Marca (Usando el logo) -->
+                <a href="#" class="flex items-center space-x-2">
+                    <img 
+                        src="./1000198061.jpg" 
+                        alt="Logo KINE.DAVIES" 
+                        class="h-8 w-auto rounded-full"
+                        onerror="this.onerror=null; this.src='https://placehold.co/32x32/0d1117/3b82f6?text=K';"
+                    >
+                    <span class="text-2xl font-extrabold text-blue-400 tracking-wider">KINE.DAVIES</span>
+                </a>
+                
+                <!-- Botón de Menú Móvil -->
+                <button id="menu-button" class="md:hidden p-2 text-gray-400 hover:text-white rounded-md transition duration-150 ease-in-out" aria-label="Abrir menú">
+                    <i data-lucide="menu"></i>
+                </button>
+                
+                <!-- Menú de Escritorio -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#perfil" class="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md font-medium transition duration-150">Perfil</a>
+                    <a href="#servicios" class="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md font-medium transition duration-150">Servicios</a>
+                    <a href="#agenda" class="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md font-medium transition duration-150">Agenda</a>
+                    <a href="#contacto" class="text-gray-300 hover:text-blue-400 px-3 py-2 rounded-md font-medium transition duration-150">Contacto</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Menú Desplegable Móvil -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <nav class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#perfil" class="text-gray-300 hover:bg-gray-800 hover:text-blue-400 block px-3 py-2 rounded-md font-medium">Perfil</a>
+                <a href="#servicios" class="text-gray-300 hover:bg-gray-800 hover:text-blue-400 block px-3 py-2 rounded-md font-medium">Servicios</a>
+                <a href="#agenda" class="text-gray-300 hover:bg-gray-800 hover:text-blue-400 block px-3 py-2 rounded-md font-medium">Agenda</a>
+                <a href="#contacto" class="text-gray-300 hover:bg-gray-800 hover:text-blue-400 block px-3 py-2 rounded-md font-medium">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Sección Hero (Principal) - Ahora con el Logo como foco visual -->
+    <section class="hero-section" id="inicio">
+        <div class="circuit-overlay"></div>
+        <div class="text-center max-w-4xl px-4 z-10">
+            <!-- Logo principal en el centro -->
+            <img 
+                src="./1000198061.jpg" 
+                alt="Logo KINE.DAVIES - Kinesiólogo" 
+                class="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-full mx-auto mb-8 shadow-2xl transition duration-500 hover:scale-105"
+                onerror="this.onerror=null; this.src='https://placehold.co/256x256/0d1117/3b82f6?text=KINE.DAVIES';"
+            >
+
+            <!-- Título Principal -->
+            <h1 class="text-6xl sm:text-7xl font-extrabold leading-tight mb-4 tracking-tighter">
+                <span class="text-blue-400">KINE.DAVIES</span>
+            </h1>
+            <!-- Subtítulo / Profesión -->
+            <p class="text-2xl sm:text-3xl font-light text-gray-300 mb-8">
+                <i data-lucide="stethoscope" class="inline-block w-8 h-8 mr-2 text-blue-400 align-middle"></i> KINESIÓLOGO
+            </p>
+            <!-- Slogan o Propuesta de Valor -->
+            <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+                Recupera tu movimiento. Tecnología y ciencia al servicio de tu bienestar.
+            </p>
+            
+            <!-- Botón de Llamada a la Acción con efecto de brillo -->
+            <a href="#agenda" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 glow-button">
+                <i data-lucide="calendar-check" class="w-6 h-6 mr-2"></i> Agendar Evaluación
+            </a>
+        </div>
+    </section>
+
+    <!-- Sección: Perfil Profesional (AJUSTADA: Nombre y Universidad) -->
+    <section class="py-20 md:py-24 bg-gray-900" id="perfil">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-extrabold text-center text-white mb-6 border-b-2 border-blue-600/50 pb-2 inline-block mx-auto">
+                Sebastián Davies Tapia
+            </h2>
+            
+            <!-- Contenedor de la Imagen del Profesional -->
+            <div class="flex justify-center mb-10">
+                <img 
+                    src="./image_90f837.png" 
+                    alt="Foto del Kinesiólogo Sebastián Davies Tapia" 
+                    class="profile-img w-40 h-40 sm:w-48 sm:h-48 object-cover rounded-full transition duration-300 hover:scale-[1.02]"
+                    onerror="this.onerror=null; this.src='https://placehold.co/192x192/0d1117/3b82f6?text=KINE';"
+                >
+            </div>
+            
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-blue-600/30 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                <!-- Columna 1: Formación y Enfoque -->
+                <div class="lg:col-span-1 border-b lg:border-r lg:border-b-0 border-gray-700/50 pb-6 lg:pr-8 lg:pb-0">
+                    <h3 class="text-2xl font-bold text-blue-400 mb-4 flex items-center">
+                        <i data-lucide="award" class="w-6 h-6 mr-2"></i> Formación y Credenciales
+                    </h3>
+                    <ul class="space-y-3 text-gray-300 text-lg">
+                        <li class="flex items-center">
+                            <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-400 flex-shrink-0"></i> Kinesiólogo
+                        </li>
+                        <!-- EGRESADO DE LA UNIVERSIDAD -->
+                        <li class="flex items-start">
+                            <i data-lucide="map-pin" class="w-5 h-5 mt-1 mr-2 text-blue-400 flex-shrink-0"></i> 
+                            Egresado de la Universidad Santo Tomás, La Serena
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="book-open-text" class="w-5 h-5 mt-1 mr-2 text-green-400 flex-shrink-0"></i> 
+                            Estudiante de Magister Fisiología Clínica del Ejercicio
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="graduation-cap" class="w-5 h-5 mt-1 mr-2 text-blue-400 flex-shrink-0"></i> 
+                            Diplomado en Terapia Manual y Rehabilitación Musculoesquelética.
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="certificate" class="w-5 h-5 mt-1 mr-2 text-blue-400 flex-shrink-0"></i> 
+                            Certificación en Rehabilitación (IRA, ERA, IAAS, Espirometría).
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="activity" class="w-5 h-5 mt-1 mr-2 text-blue-400 flex-shrink-0"></i> 
+                            Experiencia avanzada en Kinesioterapia.
+                        </li>
+                    </ul>
+                    
+                    <h3 class="text-2xl font-bold text-blue-400 mt-6 mb-4 flex items-center">
+                        <i data-lucide="target" class="w-6 h-6 mr-2"></i> Enfoque
+                    </h3>
+                    <p class="text-gray-300">
+                        Especializado en la rehabilitación <span class="text-white font-semibold">musculoesquelética</span> y <span class="text-white font-semibold">cardiorespiratoria</span>, combinando ciencia y ejercicio.
+                    </p>
+                </div>
+
+                <!-- Columna 2: Filosofía de Trabajo (El Corazón de la Reseña) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="text-2xl font-bold text-blue-400 flex items-center">
+                        <i data-lucide="heart-handshake" class="w-6 h-6 mr-2"></i> Nuestra Filosofía de Rehabilitación
+                    </h3>
+                    
+                    <!-- Principio 1: Ejercicio y Vínculo -->
+                    <div class="flex items-start bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <i data-lucide="dumbbell" class="w-6 h-6 mr-4 mt-1 text-green-400 flex-shrink-0"></i>
+                        <div>
+                            <p class="font-semibold text-white">Rehabilitación a través del Ejercicio</p>
+                            <p class="text-gray-400 text-sm">El pilar del trabajo es la activación física, complementada con un vínculo de confianza, apoyo y respeto mutuo con el paciente.</p>
+                        </div>
+                    </div>
+
+                    <!-- Principio 2: Personalización -->
+                    <div class="flex items-start bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <i data-lucide="customize" class="w-6 h-6 mr-4 mt-1 text-green-400 flex-shrink-0"></i>
+                        <div>
+                            <p class="font-semibold text-white">Planes de Trabajo Personalizados</p>
+                            <p class="text-gray-400 text-sm">Diseño de planes adaptados específicamente a las necesidades de cada paciente, enfocados en recuperar o prevenir lesiones.</p>
+                        </div>
+                    </div>
+
+                    <!-- Principio 3: Actualización Continua -->
+                    <div class="flex items-start bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 mr-4 mt-1 text-green-400 flex-shrink-0"></i>
+                        <div>
+                            <p class="font-semibold text-white">Compromiso con la Excelencia</p>
+                            <p class="text-gray-400 text-sm">Actualización constante en nuevas técnicas para ofrecer la mejor atención y asegurar que logres el objetivo deseado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Servicios (Se mantiene) -->
+    <section class="py-20 md:py-24 bg-gray-800" id="servicios">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-extrabold text-center text-white mb-12 border-b-2 border-blue-600/50 pb-2 inline-block mx-auto">
+                Nuestros Servicios
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Tarjeta de Servicio 1: Kinesiología Traumatológica -->
+                <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700 transition duration-500 hover:border-blue-600 hover:shadow-blue-900/50">
+                    <div class="text-blue-400 mb-4 flex justify-center">
+                        <i data-lucide="bone" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3 text-center">Kinesiología Traumatológica</h3>
+                    <p class="text-gray-400 text-center">
+                        Recuperación de lesiones musculoesqueléticas, post-operatorios y rehabilitación deportiva.
+                    </p>
+                </div>
+                
+                <!-- Tarjeta de Servicio 2: Rehabilitación Neurológica -->
+                <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700 transition duration-500 hover:border-blue-600 hover:shadow-blue-900/50">
+                    <div class="text-blue-400 mb-4 flex justify-center">
+                        <i data-lucide="brain" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3 text-center">Rehabilitación Neurológica</h3>
+                    <p class="text-gray-400 text-center">
+                        Manejo de patologías como ACV, Parkinson, esclerosis y otras condiciones neurológicas.
+                    </p>
+                </div>
+                
+                <!-- Tarjeta de Servicio 3: Terapia Manual y Fisioterapia -->
+                <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700 transition duration-500 hover:border-blue-600 hover:shadow-blue-900/50">
+                    <div class="text-blue-400 mb-4 flex justify-center">
+                        <i data-lucide="hand-metal" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3 text-center">Terapia Manual y Fisio.</h3>
+                    <p class="text-gray-400 text-center">
+                        Técnicas avanzadas para alivio del dolor y mejora de la movilidad articular y muscular.
+                    </p>
+                </div>
+                
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Sección de Agenda de Horas (Se mantiene) -->
+    <section class="py-20 md:py-24 bg-gray-900" id="agenda">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-extrabold text-center text-white mb-12">
+                Paso 1: Selecciona una Fecha
+            </h2>
+            
+            <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl border border-blue-600/30">
+                <!-- Encabezado del Calendario -->
+                <div class="flex justify-between items-center mb-6 text-white">
+                    <button id="prev-month" class="p-2 rounded-full hover:bg-gray-700 transition duration-150">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <div class="text-2xl font-bold" id="month-year-display"></div>
+                    <button id="next-month" class="p-2 rounded-full hover:bg-gray-700 transition duration-150">
+                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- Días de la Semana -->
+                <div class="grid grid-cols-7 gap-1 text-center font-semibold text-blue-400 mb-4">
+                    <span>Dom</span>
+                    <span>Lun</span>
+                    <span>Mar</span>
+                    <span>Mié</span>
+                    <span>Jue</span>
+                    <span>Vie</span>
+                    <span>Sáb</span>
+                </div>
+
+                <!-- Contenedor del Calendario -->
+                <div class="grid grid-cols-7 gap-1 text-center text-gray-300" id="calendar-grid">
+                    <!-- Aquí se insertarán los días del calendario mediante JS -->
+                </div>
+                
+                <!-- Mensaje de confirmación/instrucción -->
+                <div id="date-message" class="mt-8 p-4 bg-gray-700 rounded-lg text-center text-lg hidden">
+                    <!-- El mensaje se actualizará aquí -->
+                </div>
+
+                <!-- Botón de Agendar (Aparece después de la selección) -->
+                <a 
+                    id="whatsapp-link"
+                    href="#"
+                    target="_blank"
+                    class="hidden mt-6 flex items-center justify-center w-full px-8 py-3 text-lg font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 transition duration-300 shadow-lg shadow-green-500/30"
+                >
+                    <i data-lucide="whatsapp" class="w-7 h-7 mr-3"></i> Paso 2: Finalizar Agenda por WhatsApp
+                </a>
+
+            </div>
+        </div>
+    </section>
     
+    <!-- Sección de Contacto (AJUSTADA) -->
+    <section class="py-20 md:py-24 bg-gray-800" id="contacto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-extrabold text-center text-white mb-12">
+                Información de Contacto
+            </h2>
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Contenedor Grid para Contacto y Modalidades de Pago -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <!-- Columna 1: Información de Contacto -->
+                    <div class="space-y-6">
+                         <h3 class="text-2xl font-bold text-blue-400 mb-4 border-b border-gray-700 pb-2">Datos de Contacto</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                            
+                            <!-- Teléfono/WhatsApp -->
+                            <div class="bg-gray-900 p-4 rounded-xl border border-gray-700 hover:border-blue-600 transition duration-300">
+                                <i data-lucide="phone" class="w-6 h-6 mb-2 text-blue-400 mx-auto block"></i>
+                                <p class="text-gray-400 text-sm">Teléfono</p>
+                                <span class="text-base font-mono text-white block">+56 9 2047 7469</span>
+                            </div>
+
+                            <!-- Correo Electrónico (Ajuste de estilos para el overflow) -->
+                            <div class="bg-gray-900 p-4 rounded-xl border border-gray-700 hover:border-blue-600 transition duration-300">
+                                <i data-lucide="mail" class="w-6 h-6 mb-2 text-blue-400 mx-auto block"></i>
+                                <p class="text-gray-400 text-sm">Correo</p>
+                                <!-- Se agrega min-w-0 y break-words para asegurar que el texto se ajuste si es necesario -->
+                                <span class="text-sm font-mono text-white block break-words min-w-0">kine.davies@gmail.com</span>
+                            </div>
+
+                            <!-- Instagram Link -->
+                            <a href="https://www.instagram.com/kine.davies/" target="_blank" class="bg-gray-900 p-4 rounded-xl border border-gray-700 hover:border-blue-600 transition duration-300 flex flex-col items-center justify-center">
+                                <i data-lucide="instagram" class="w-6 h-6 mb-2 text-blue-400"></i>
+                                <p class="text-gray-400 text-sm">Instagram</p>
+                                <span class="text-base font-mono text-white">@kine.davies</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna 2: Modalidades de Pago -->
+                    <div class="bg-gray-900 p-6 rounded-xl border-2 border-green-500/50 shadow-lg shadow-green-900/50">
+                        <h3 class="text-2xl font-bold text-green-400 mb-4 flex items-center border-b border-gray-700 pb-2">
+                            <i data-lucide="wallet" class="w-6 h-6 mr-2"></i> Modalidades de Pago
+                        </h3>
+                        <div class="space-y-4">
+                            
+                            <!-- Opción 1: Particular y Convenios -->
+                            <div class="flex items-start">
+                                <i data-lucide="user-check" class="w-6 h-6 mr-3 mt-1 text-blue-400 flex-shrink-0"></i>
+                                <div>
+                                    <p class="font-semibold text-white">Particular y Convenios</p>
+                                    <p class="text-gray-400 text-sm">Agenda tu sesión de forma directa. Consulta por convenios disponibles.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Opción 2: ISAPRE -->
+                            <div class="flex items-start">
+                                <i data-lucide="shield-half" class="w-6 h-6 mr-3 mt-1 text-blue-400 flex-shrink-0"></i>
+                                <div>
+                                    <p class="font-semibold text-white">ISAPRE</p>
+                                    <p class="text-gray-400 text-sm">Atención con reembolso de tu plan de salud (boleta electrónica).</p>
+                                </div>
+                            </div>
+
+                            <!-- Opción 3: FONASA -->
+                            <div class="flex items-start">
+                                <i data-lucide="file-check" class="w-6 h-6 mr-3 mt-1 text-blue-400 flex-shrink-0"></i>
+                                <div>
+                                    <p class="font-semibold text-white">FONASA</p>
+                                    <p class="text-gray-400 text-sm">Se acepta atención con bonos FONASA (pago directo).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Botón Flotante de WhatsApp -->
+    <a 
+        href="https://wa.me/56920477469?text=Hola%2C%20quisiera%20consultar%20por%20una%20hora%20de%20evaluaci%C3%B3n." 
+        target="_blank" 
+        class="whatsapp-float-button fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-green-500 text-white rounded-full p-4 sm:p-5 shadow-2xl hover:bg-green-600"
+        aria-label="Chatear por WhatsApp para agendar una hora"
+    >
+        <i data-lucide="whatsapp" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+    </a>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-700 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <!-- Social Media Links en Footer -->
+            <div class="flex justify-center space-x-4 mb-4">
+                <!-- WhatsApp -->
+                <a href="https://wa.me/56920477469" target="_blank" class="text-gray-400 hover:text-green-500 transition duration-300" aria-label="WhatsApp">
+                    <i data-lucide="whatsapp" class="w-6 h-6"></i>
+                </a>
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/kine.davies/" target="_blank" class="text-gray-400 hover:text-blue-400 transition duration-300" aria-label="Instagram">
+                    <i data-lucide="instagram" class="w-6 h-6"></i>
+                </a>
+            </div>
+            <p>&copy; <span id="year"></span> KINE.DAVIES - Kinesiólogo. Todos los derechos reservados.</p>
+            <p class="text-gray-600 text-xs mt-1">Correo de contacto: kine.davies@gmail.com</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Inicialización de Lucide Icons
+        lucide.createIcons();
+
+        // Lógica del menú móvil
+        const menuButton = document.getElementById('menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Cierra el menú móvil al hacer clic en un enlace de navegación
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+        
+        // Establecer el año actual en el footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ----------------------------------------------------
+        // LÓGICA DEL CALENDARIO INTUITIVO
+        // ----------------------------------------------------
+        
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+        
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedDate = null;
+
+        const calendarGrid = document.getElementById('calendar-grid');
+        const monthYearDisplay = document.getElementById('month-year-display');
+        const prevMonthButton = document.getElementById('prev-month');
+        const nextMonthButton = document.getElementById('next-month');
+        const whatsappLink = document.getElementById('whatsapp-link');
+        const dateMessage = document.getElementById('date-message');
+
+        function generateCalendar(month, year) {
+            // Limpia la cuadrícula anterior
+            calendarGrid.innerHTML = '';
+            
+            // Actualiza el mes y año en el display
+            monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayDate = today.getDate();
+            const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+            // Dibuja celdas vacías para el desfase del primer día
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('p-3', 'text-gray-600', 'rounded-lg');
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Dibuja los días del mes
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.textContent = day;
+                dayCell.classList.add('day-cell', 'p-3', 'rounded-lg', 'font-medium', 'flex', 'items-center', 'justify-center', 'aspect-square');
+                dayCell.dataset.day = day;
+
+                // Deshabilita días pasados
+                const isPast = isCurrentMonth && day < todayDate;
+                
+                // Deshabilita Sábados (6) y Domingos (0) para la agenda (asume atención L-V)
+                const dateCheck = new Date(year, month, day);
+                const isWeekend = dateCheck.getDay() === 0 || dateCheck.getDay() === 6;
+
+                if (isPast || isWeekend) {
+                    dayCell.classList.add('disabled', 'bg-gray-700/50');
+                } else {
+                    dayCell.classList.add('bg-gray-700');
+                    dayCell.addEventListener('click', handleDateSelection);
+                }
+
+                // Marca el día seleccionado
+                if (selectedDate && 
+                    selectedDate.getDate() === day && 
+                    selectedDate.getMonth() === month && 
+                    selectedDate.getFullYear() === year) {
+                    dayCell.classList.add('selected');
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+
+            // Deshabilita el botón "anterior" si estamos en el mes actual
+            prevMonthButton.disabled = isCurrentMonth;
+            prevMonthButton.classList.toggle('opacity-50', isCurrentMonth);
+            prevMonthButton.classList.toggle('hover:bg-gray-700', !isCurrentMonth);
+        }
+
+        function handleDateSelection(event) {
+            const day = parseInt(event.target.dataset.day);
+            selectedDate = new Date(currentYear, currentMonth, day);
+
+            // Remueve la clase 'selected' de todas las celdas
+            document.querySelectorAll('.day-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+
+            // Agrega la clase 'selected' a la celda clickeada
+            event.target.classList.add('selected');
+            
+            updateBookingStep();
+        }
+        
+        function updateBookingStep() {
+            if (!selectedDate) return;
+
+            // Formatea la fecha seleccionada para el mensaje
+            const formattedDate = selectedDate.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            // 1. Actualiza el mensaje
+            dateMessage.innerHTML = `
+                <i data-lucide="check-circle" class="w-6 h-6 mr-2 inline-block text-green-400 align-middle"></i>
+                Has pre-seleccionado el día: <span class="font-bold text-blue-400">${formattedDate}</span>.
+                <br>Ahora, haz clic abajo para contactar por WhatsApp y confirmar la hora exacta.
+            `;
+            dateMessage.classList.remove('hidden');
+            
+            // 2. Prepara el enlace de WhatsApp
+            const whatsappMessage = `Hola KINE.DAVIES, quisiera agendar una hora de evaluación para el día ${formattedDate}. ¿Qué horas tienes disponibles?`;
+            const encodedMessage = encodeURIComponent(whatsappMessage);
+            const whatsappUrl = `https://wa.me/56920477469?text=${encodedMessage}`;
+            
+            whatsappLink.href = whatsappUrl;
+            whatsappLink.classList.remove('hidden');
+            
+            // Re-renderiza los íconos (para que se muestre el check-circle)
+            lucide.createIcons();
+        }
+
+        // Navegación del Calendario
+        prevMonthButton.addEventListener('click', () => {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        nextMonthButton.addEventListener('click', () => {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        // Generar calendario inicial
+        generateCalendar(currentMonth, currentYear);
+    </script>
 </body>
 </html>
